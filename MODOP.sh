@@ -97,7 +97,7 @@ load-balancer-controller/test/run-with-ssl.sh
 EC2/LoadBalancer
 on récup le nom de l'app dans le domaine (cf les rules en bas)
 ROUTE53 : clic sur la route
-CREATE RECORD : sample-app (le \.suite s'affiche tout seul)
+CREATE RECORD : sample-app (le .suite s'affiche tout seul)
 COCHER ALIAS == route traffic to LOAD BALANCER / region we are.
 CREATE records.
 
