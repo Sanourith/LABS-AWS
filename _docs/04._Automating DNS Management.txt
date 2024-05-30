@@ -1,0 +1,137 @@
+Hello Cloud Gurus, welcome back.
+In this lesson we'll go through automating DNS management.
+This is what we'll cover in this lesson.
+We'll describe the problem we have
+with creating manual DNS records for our load balancers,
+as we showed in the previous lesson.
+Then we'll introduce the External DNS automation tooling.
+We'll move to a quick demo where we are going
+to be installing the tool into our cluster and testing it.
+And finally, we'll summarize the lesson.
+So what's the problem we currently have?
+In the last lesson, we saw that the DNS creation was manual
+and that means there is too much effort for us
+to maintain more load balancers, rules and so on.
+The infrastructure can also change.
+So it means that we'll have to update DNS records
+all over the place to accommodate the changes.
+Okay, coming back to our diagram,
+this is where the end user accesses
+the load balancer through the DNS record we created
+and that the communication is encrypted.
+Now, let's introduce you to External DNS.
+This is an open source project that helps us
+maintaining the DNS records for us,
+which means that it lives in the Kubernetes cluster,
+watching for resources that it is able
+to create DNS records for.
+For example, load balancers.
+We'll need to give some IAM permissions
+so that it interacts with Route 53 to create
+some records like bookstore.acloudguru.com,
+or whichever other DNS you need.
+Let's jump into the demo by first adjusting
+the IAM permissions of the worker nodes
+to allow access to Route 53,
+and then installing the External DNS.
+Okay so, here we are in our source code
+and let's go to the Infrastructure folder,
+then k8s-tooling, and then external-dns.
+In here, we're gonna find a simple create.sh file,
+which is basically installing
+the public External DNS helm chart.
+So let's go to our CloudShell
+and let's execute this script.
+Okay, so here we are in our management console
+and the very first thing we're gonna do is
+that if you come from the previous lesson
+and you still have those resources,
+let's delete the DNS record we manually create it.
+So let's go to Route 53.
+Let's go to our hosted zone.
+Let's expand a little bit.
+And here is the one we manually created.
+We just need to delete that record
+because External DNS will be the one creating it for us.
+Now let's go to CloudShell
+and let's install External DNS.
+Okay, we are in the root of the repository
+and let's go to the Infrastructure folder,
+k8s-tooling and external-dns.
+And here we have for create.sh file
+and that's the one that we are gonna execute.
+Cool, so it deployed the External DNS application
+in the default namespace.
+So let's do a kubectl get pods.
+And there you go, that's our External DNS pod
+already up and running.
+Now, since we are coming from the previous lesson,
+let's go back one level in the folder.
+Let's go to the load balancer controller
+and let's go to the test folder.
+Remember that we executed this with the run with SSL script,
+plus we also have the ACM certificate for TLS termination
+under this host name we have in here.
+So if you haven't done that,
+please make sure you visit the previous lesson
+but if you do, let's continue with this one.
+Now, External DNS won't be able to do anything
+until we provide the required permissions.
+So let's go to our worker nodes IAM role
+and let's modify its permissions
+so that it can talk to Route 53.
+Let's close CloudShell
+and let's go to CloudFormation.
+Here we are.
+Cool, so let's open the node group stack.
+Let's go to Resources.
+Let's just scroll down
+and let's open the NodeInstanceRole.
+Okay, let's add permissions, attached policy.
+Any here where we are gonna type is AmazonRoute53FullAccess.
+There you go.
+We're gonna provide full access.
+And this is all what we needed to do.
+Okay, so now what we have to do is to delete
+the External DNS pod
+and the deployment will create a new one
+which is going to be able to proceed with the changes.
+Let's open CloudShell once again.
+Let's grab the pod name
+and let's do kubectl delete pod.
+And there you go. It is deleted.
+Now if we do kubectl get pods once again,
+we're gonna see that the new pod is being created.
+It's not ready yet.
+Let's try it again.
+And there you go. Now it is ready.
+Cool, so it basically now have all the IAM permissions
+required for interacting with Route 53.
+So now let's close CloudShell
+and let's go to Route 53 once again.
+Let's go to the hosted zone.
+Let's open it up.
+And as you can see, let's expand a little bit.
+Here is our sample app DNS record
+with some TXT and cname as well
+that External DNS creates for its own internal database.
+Cool, so what we just saw is that now External DNS
+is going to be managing the creation, modification
+and deletion of our DNS for the load balancers
+and other services we expose in our Kubernetes cluster.
+We can always copy it and let's open it up.
+And boom, as you can see,
+we still have our service app and running
+but this time we don't have to worry about managing the DNS.
+Nice to see all that automation happening, right?
+Let's summarize this lesson.
+First, we discussed about the challenges
+of the manual DNS management.
+We also explore how the External DNS as an automation tool
+helps us facilitating the management of the DNS records.
+And finally, we reviewed how to install it on our cluster
+and running a quick example to show how it works.
+That's all for this lesson.
+If you have any questions, please let me know.
+Otherwise, feel free to move to the next one.
+Thank you.

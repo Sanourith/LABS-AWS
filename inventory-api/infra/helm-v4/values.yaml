@@ -8,9 +8,9 @@ baseDomain: sample.com
 aws:
   region: us-east-1
   accountId: 12345678909
-  
+
 image:
-  repository: 
+  repository:
     name: bookstore.inventory-api
   tag: latest
   pullPolicy: IfNotPresent
@@ -26,12 +26,12 @@ aws:
   region: us-east-1
 
 resources: {}
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi
 
 nodeSelector: {}
 

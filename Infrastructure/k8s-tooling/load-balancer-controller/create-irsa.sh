@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 helm repo add eks https://aws.github.io/eks-charts
 
 aws cloudformation deploy \

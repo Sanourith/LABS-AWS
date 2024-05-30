@@ -1,0 +1,50 @@
+Hello Cloud Gurus.
+Congratulations for making it to this point.
+It has been quite an interesting chapter,
+so let's review what we have learned through it.
+We started talking about the importance
+of keeping resources private and we learned how
+to make our cluster private with EKS CTL.
+Remember, it's just this little piece of YAML
+that will do the job.
+I also recommended the open VPN course here
+in a cloud guru, which I am sure is a great way
+to improve even more your security posture.
+Then we moved to load balancing and DNS with EKS.
+We talked about the AWS Load Balancer Controller
+as the ideal tool to manage load balancing in our cluster.
+We also learned how to keep our communication
+from the end user secure with encryption
+using TLS/SSL certificates with ACM.
+And we learned about external DNS,
+an open source project
+that will manage domain name integrations with our cluster.
+We moved very quickly to the installation
+of our bookstore application,
+starting with the DynamoDB tables as the data source
+of our application.
+Remember that we used cloud formation for deploying these.
+And then moving to the microservices using Helm
+for installing them in our EKS cluster.
+And finally, we talked about the VPC CNI add-on,
+which is an open source project developed
+by AWS that implements
+the Container Network Interface for Kubernetes.
+By default, it is already installed on our EKS cluster
+and it's very easy to manage it from the console
+to do updates for example.
+We customize it to expand reachability
+of our networking with a secondary CIDR in our VPC.
+So now let me ask you a question.
+What else you can do with EKS networking?
+Think about AWS local zones
+or protecting different namespaces
+or granular networking segmentation right there
+on your EKS cluster.
+Ideas are endless.
+Just take these concepts as little building blocks
+so you can create your own solution with them.
+That's all for this chapter.
+If you have any questions, please let me know.
+Otherwise, feel free to move to the next one.
+Thank you.

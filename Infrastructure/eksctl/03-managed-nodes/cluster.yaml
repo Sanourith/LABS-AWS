@@ -12,9 +12,9 @@ vpc:
     gateway: HighlyAvailable
 
 managedNodeGroups:
-  - name: eks-node-group-managed-nodes
-    instanceType: t3.medium
-    desiredCapacity: 3
-    privateNetworking: true
+- name: eks-node-group-managed-nodes
+  instanceType: t3.medium
+  desiredCapacity: 3
+  privateNetworking: true
 
 availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"] # This is required since in us-east-1 only 2 subnets are created by default (https://eksctl.io/usage/vpc-networking/)

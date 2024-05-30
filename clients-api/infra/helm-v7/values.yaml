@@ -10,7 +10,7 @@ aws:
   accountId: 12345678909
 
 image:
-  repository: 
+  repository:
     name: bookstore.clients-api
   tag: latest
   pullPolicy: IfNotPresent
@@ -23,12 +23,12 @@ service:
   scheme: internet-facing
 
 resources: {}
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+# limits:
+#  cpu: 100m
+#  memory: 128Mi
+# requests:
+#  cpu: 100m
+#  memory: 128Mi
 
 nodeSelector: {}
 

@@ -4,6 +4,7 @@ metadata:
   name: services-ingress
   namespace: {{ .Release.Namespace }}
   annotations:
+    # kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/group.name: my-group
     alb.ingress.kubernetes.io/scheme: internet-facing
 {{- if not .Values.ssl.enabled }}

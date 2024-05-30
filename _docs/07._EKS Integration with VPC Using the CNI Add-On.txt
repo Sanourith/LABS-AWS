@@ -1,0 +1,115 @@
+Hello, Cloud Gurus. Welcome back.
+In this lesson, we'll be talking about
+how to customize the networking around EKS
+with the help of the CNI add-on.
+Let's break down this lesson.
+First, we'll go through what is the Amazon VPC CNI add-on.
+Then we'll see how it is integrated with EKS.
+Finally, we'll see what's next
+because in the next lesson,
+we'll demonstrate how to customize the CNI add-on.
+CNI stands for Container Network Interface,
+which is the instructions or guidelines
+that a container environment needs to have
+related to the administration of the networking.
+Maintaining containers in terms of network
+is one of the most important parts.
+So CNI defines a standard that describes
+how the container orchestrators manage their connections.
+Following the guidelines,
+CNI is implemented in the form of plugins
+and can be customized and switched in different run times.
+Finally, the most famous container orchestration tooling,
+like ECS, OpenShift and of course, Kubernetes,
+implements CNI on their own way, but still being CNI,
+which means that all of them follow the same strategy
+in the general way and prevent redoing work.
+AWS has developed an open source project
+that implements the standard of CNI.
+It integrates smoothly with EKS and with VPC
+because it allocates the pods
+at the same level of the VPC.
+So the containers are part
+of the same network you are already working with.
+No more headaches.
+And the cool thing about this is
+that the add-on is already installed on your cluster.
+You can use the Add-on section in the EKS console
+to manage it from here as well,
+like for doing upgrades, for example.
+So what's next?
+We can manage it from the A WS console,
+and that's where we're gonna be doing next lesson.
+It is already integrated with the VPC,
+so we are gonna basically extend this integration.
+Now let's push it even further.
+In the next lesson,
+we're gonna have a demo explaining how to customize it
+on a very specific scenario.
+Since the CNI add-on is already installed in our cluster,
+we are already receiving benefits from it,
+and we understood how smooth this makes the networking
+between EKS and the VPC.
+And we'll connect it closer
+with other services, like Load Balancers.
+But given this CNI knowledge,
+we can now expand and customize our network.
+Let's just start from our VPC we already have created.
+In here, we have multiple subnets, but let's just show one.
+Also, there is a default security group
+that will be assigned to our pods in a specific subnet,
+and we can start creating VPC-oriented services,
+like EC2 instances or RDS clusters.
+Each of these will be attached to one
+or more security groups
+and receive private APs that belong
+to the CIDR of the subnet they were created,
+which, at the same time,
+is part of the CIDR of the whole VPC.
+For our Kubernetes cluster,
+using EKS works exactly the same.
+We create a pod inside the cluster,
+and here is where the CNI plugin jumps into the game
+and assigns an available IP
+that is part of the CIDR of the subnet to it
+and also puts a security group in front of it,
+just like with the EC2 instance and the RDS cluster.
+Now BPC supports secondary CIDRs,
+different than the one we initially created.
+One use case of a secondary CIDR is
+when the main IP block is too short,
+and it doesn't have enough free spots
+for new IPs or simply to separate some nets
+and customize it for security reasons, for example.
+This means that we can create subnets under the new CIDR
+and with different security groups if needed.
+So what it means for Kubernetes?
+You guessed it.
+We can now take out the pod
+that we created in the original subnet,
+and by configuring the CNI add-on to do so,
+create that part in the new subnet that belongs
+to the new CIDR in the same VPC,
+and it will assign a new IP to it of that domain.
+So with this, you can assign different security groups
+than the one the worker notes have,
+and from there,
+customize your network as your needs demand it.
+Cool, isn't it?
+In this demo, we will be doing exactly this
+with a lot of automation and customization
+to the CNI plugin or add-on.
+So it will be very important to watch the demo pretty close
+and pause sometimes to understand much more about it.
+I also recommend you to read
+about the secondary CIDR in a VPC,
+which I will let the link in the resources of this lecture.
+So let's summarize this lesson.
+We went through what the Amazon VPC CNI add-on is
+and how it relates to other container orchestration tooling.
+We explored how the VPC CNI add-on integrates with EKS,
+and we briefly talked about what's next for the demo.
+That's all for this lesson.
+If you have any questions, please let me know.
+Otherwise, feel free to move to the next one.
+Thank you.

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ./scripts-by-chapter/chapter-1.sh
 ./scripts-by-chapter/chapter-2.sh
 ./scripts-by-chapter/chapter-3.sh

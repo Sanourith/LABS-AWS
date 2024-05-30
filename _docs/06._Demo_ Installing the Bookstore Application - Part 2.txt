@@ -1,0 +1,228 @@
+Hello Cloud gurus. Welcome back.
+In this lesson,
+we're gonna be installing the bookstore application,
+and this is the part two of this demo.
+Remember that the first part was
+about DynamoDB table creation
+and assigning the IAM policy to the worker nodes role.
+In this time, we're gonna focus
+on installing the microservices required for our application
+and then we're gonna test
+that everything is connected correctly.
+So let's go to our source code.
+Here we are in the source code
+and let's open the clients-API folder for a second.
+Let's go to infra folder and let's open the helm folder.
+And here we're gonna find a helm chart
+that will install the clients-API for us.
+Let's just start with the values.yaml for a second.
+We can see a couple of interesting things
+like the base domain, the region we are deploying into,
+the repository of the docker image of this application.
+We're gonna dig way more deeper on this in further chapters,
+and some other configurations about the application.
+We're also gonna have a create.sh file.
+And what we are finding here is the instructions
+for installing that helm chart.
+Now, there are a couple of things
+I want to drive your attention to.
+The first one is that
+if the development namespace is not existing,
+we're gonna create the namespace.
+And also we are gonna be setting the base domain
+of the values with the domain name
+of the hosted zone we have in route 53.
+And we are getting that with the AWS CLI
+and saving it into the base domain variable.
+Okay, pretty cool.
+Now let's open the templates folder
+to see what exactly we're deploying.
+And we have a typical deployment with bit service.
+Nothing real fancy here.
+Let's go to the deployment.
+And in here, nothing fancy neither.
+We are just adding some environment variables, for example,
+and we are getting the rest
+off of the values and the helpers.
+Let's go to our ingress yaml.
+And here we have an ingress
+very similar to the one we were modifying
+when we were testing the AWS Load Balancer Controller
+and external DNS.
+In this case, we are gonna have the host is specific
+for clients-api dot
+and the base value specified in the values.
+And we are also gonna have the redirection
+to the HTTPS port.
+Up here, we can identify a couple of things.
+we are already familiar with,
+the lease and ports
+port 80 for redirection, and 443 for the actual connection,
+a group name, which will be the namespace,
+the scheme, in this case,
+we're gonna be taking the one off of the values file
+which is internet facing by default
+and some other annotations.
+Once again, all the documentations
+about what each of these do is on the resources
+of that specific lesson.
+Okay, that's great.
+Now, as you could imagine,
+and as we had with the CloudFormation template
+for the DynamoDB tables,
+we're gonna find the same helm folder
+across all the applications.
+This time, including the front end one.
+We didn't include it last time because this one
+doesn't really require a direct DynamoDB table.
+But if we navigate to the front end folder,
+then infra, then helm,
+we're gonna find it that we have the same structure.
+Okay, so let's go to CloudShell
+and let's install these five helm releases
+so that we have our application app and running.
+Okay, here we are already in CloudShell
+and let's navigate, for example,
+to the clients-API.
+CD clients-API.
+And in this folder, let's go to infra
+and let's go immediately to helm.
+There you go.
+We have the create.sh file
+and that's what we are gonna be executing.
+Cool. That's awesome.
+So it means that it already created its deployment,
+its service and the ingress,
+which by the way,
+the load balancer controller should have picked it up
+and the external DNS will assign a custom DNS
+to that load balancer so that we can access it.
+Let's repeat the process for the rest of the microservices.
+Let's go back.
+Now let's see.
+Let's continue with the resource-API, for example.
+Let's go to infra, then helm
+and let's run the create.sh file.
+Okay, cool. Let's go back.
+And now let's go to renting-API, for example.
+CD infra, CD helm, and let's create.
+Awesome. Let's go back to the root once again.
+Let's go to inventory-API this time.
+So the infra, so the helm,
+and let's do the create.
+Awesome.
+Now let's go to the front end, which is the last one.
+CD front end.
+CD infra and CD helm.
+Let's do the create.sh.
+It should be quick. And there you go.
+Okay, that was super quick.
+So now let's clear this
+and let's run the command kubectl get pods
+of the namespace development.
+And as you can see,
+we already have all of our microservices.
+If you look a little bit closer,
+you're gonna find that there are two front end pots.
+One of them is the proxy
+which is the one communicating the front end
+with the backend as a proxy.
+Okay, this is great.
+So let's list the ingresses as well.
+Kubectl get ingresses
+of the namespace development.
+And as you can see here, we have six ingresses,
+each of them with different hosts.
+For example, we have clients-API, the API itself,
+inventory-API, renting-API,
+resource-API,
+and the bookstore which is our front.
+Okay, that's great.
+This is looking pretty good.
+Now as we speak, the AWS Load Balancer Controller
+and external DNS should be doing their work.
+So let's go and take a look at the load balancer.
+Let's close CloudShell
+and let's go to EC2.
+There we go.
+Let's go down here to load balancers.
+And here we have our load balancer
+which is already in the state active.
+Let's open it up and let's go to listeners.
+We're gonna have two listeners,
+the HTTPS and the HTTP only for redirection.
+Let's go to rules.
+And as you can see, we have here clients-API
+the API itself, which is the proxy,
+the bookstore which is the front end itself,
+the inventory-API, the renting-API
+and the resource-API.
+This is great because as you can see,
+we are using just one load balancer
+for integrating all of them.
+Now you might say, "Why do we have just one load balancer
+if we have six ingresses?"
+That's a very interesting question.
+Let's go to the CloudShell very quick
+and I'm gonna answer that showing you the ingress.
+Here we have our ingresses, and let's see, for example
+the clients-API ingress.
+Kubectl describe ingress.
+Let's space the name of the namespace development
+and let's focus on the annotation called group.name
+which says development.
+Now let's pick another one.
+Let's say the inventory-API.
+And let's do the same command, kubectl,
+describe ingress of the namespace development.
+And there you go, group.name here is also development.
+This means that
+the AWS Load Balancer Controller is smart enough
+to merge all these ingresses into just one load balancer,
+which is great for improving our management
+of the load balancers and optimizing the cost
+by just paying for one load balancer.
+That's awesome. Let's close this.
+And now let's go to route 53.
+There you go. Hosted zone.
+Let's open it up.
+And wow, we have multiple stuffs in here.
+Let's expand this a little bit.
+And for sure, it created every single application we needed
+as a DNS record.
+This is awesome. Just like magic.
+So let's pick the bookstore application one,
+which should be pointing to.
+There you go. Our load balancer.
+Lemme expand this here a little bit.
+And as you can see, it is the load balancer we already have.
+Now let's open our bookstore application.
+It should be working, right?
+Awesome. So here is our application already running.
+As you can see, it is SSL terminated.
+So we are encrypting the traffic
+and we have our resources section,
+the clients and the inventory.
+Let's just try to create a client.
+For example, I'm gonna create myself.
+This is a sample test.
+Let's click okay, and there you go.
+It is working as expected,
+which means that we are also successfully connected
+with our DynamoDB tables.
+And there you go.
+Now you have a fully functional bookstore application
+that you can use right away that you've been dreaming with.
+Just kidding. And that's all of our demo.
+Okay, so let's summarize our demo.
+First, we install all the applications microservices
+using helm in our Kubernetes cluster.
+And then we tested that everything was running as expected.
+We could see that the microservices were connecting
+to DynamoDB, that the load balancer got created and updated
+and the DNS records were automatically created.
+Again, just like magic.
+And this is all for this lesson.
+If you have any questions, please let me know.
+Otherwise, feel free to move to the next one
+where we are gonna have more magic.

@@ -1,0 +1,127 @@
+Hello, cloud gurus, welcome back.
+We're gonna have a big demo of installing
+the Bookstore application
+and we are gonna be splitting that into two parts.
+This specific lesson is the first part.
+Let's see what we're gonna cover in this one.
+It will be a full practical experience
+where we are going to be creating
+the necessary DynamoDB tables and assigning the IAM policy
+to the worker nodes to grant access to the DynamoDB table.
+So, let's jump right into it.
+Okay, so here we are in our source code
+and we have five folders which correspond
+to each of the microservices that are part of our solution.
+So, we have the front end, client's API, inventory API,
+renting API, and resource API.
+As we saw in the previous chapter,
+we have a front end part, which is only one microservice,
+as you can see under the front end folder.
+And the backend part is everything that ends
+with API on it, because those are internal APIs.
+Each of these APIs are gonna have a DynamoDB table.
+So, let's open, for example, the client's API folder.
+Let's go under infra and let's navigate to cloud formation.
+In here we're gonna find a couple of yaml files
+and a couple of bash script files.
+We're gonna focus only into the DynamoDB table,
+that yaml, which is a cloud formation template
+that creates the DynamoDB table for the client's API.
+And we're gonna focus also on the create DynamoDB table
+that sh, which is in a script that will deploy
+that cloud formation template for us.
+Now, there is an important topic in here
+called the namespace, which is going to be the environment
+we are gonna be deploying into.
+In a normal CACD world, you're gonna have, for example,
+development, test or QA, UAT or a stage and production.
+Each organization can have their own environments
+as required.
+In our case, we're gonna be deploying the development
+environment, or namespace.
+Now, this same structure is found in other three places.
+Can you guess where?
+Those other three places are the other APIs.
+So, if we go, for example, to inventory API,
+then we go to infra, we're gonna find under
+the cloud formation the same folder structure.
+Let's go down, let's go to renting API, infra
+and cloud formation.
+Let's continue moving on.
+Resource API, infra, cloud formation.
+So, it means that we already have everything ready
+for deploying our DynamoDB tables.
+So, now, let's go to the CloudShell and let's execute
+each of these four create DynamoDB table scripts.
+Okay, here we are in our management console.
+Let's open CloudShell.
+Let's make sure we are in the root of the repository.
+There we go.
+So, let's just start with clients API.
+Let's go there, clients API.
+Let's go to infra, let's go to cloud formation.
+And there we go.
+Now, let's take a quick look again
+to the create DynamoDB table script.
+And as you can see it is receiving one parameter
+called namespace.
+If we don't specify any the development one
+will be the default and that's actually what we want.
+So, you can either run it without any parameters,
+or you can specify the development parameter.
+Let's do it in that way.
+Create DynamoDB table, develop.
+Now, it is going to take some time,
+so I'm gonna pause the video here
+and come back when this is done.
+Okay, there you go.
+It'll already created and now we have to repeat
+the exact same process for inventory API, renting API
+and resources API.
+So, please go ahead and do so.
+I'm gonna pause the video here.
+I'm gonna do those myself
+and I will come back after this is done.
+Okay, there you go.
+I already executed inventory API, renting API
+and resources API, DynamoDB table creations.
+Let's go to DynamoDB and see those tables.
+So, let's close CloudShell and let's navigate to DynamoDB.
+Okay, here we are.
+Let's go to tables.
+And boom, as you can see, clients, inventory,
+renting and resources, DynamoDB tables.
+Also, if you noticed, the development prefix is here,
+so that we identify which tables
+are for each environment that we create.
+Okay, that's cool.
+So, now, let's add the IAM DynamoDB permissions
+for the worker nodes iron role.
+We've already done these for the AWS load balancer
+controller and external DNS.
+So, you might be familiar with the process,
+but if not, it's fine.
+I'm gonna show you how to do it.
+So, let's go to cloud formation.
+Let's go to the no group stack.
+Let's go to resources, scroll down, and here,
+let's pick the node instance role.
+In here, we're gonna add a new policy
+and we're gonna look for DynamoDB.
+Let's pick the Amazon DynamoDB full access
+and let's add the permissions.
+And that's all.
+Now, everything that we put on our Kubernetes cluster
+will have DynamoDB permissions, including our applications,
+which is something we're gonna install in the next lesson.
+Okay, that was fun.
+Now, let's summarize the demo.
+First, we created the necessary DynamoDB tables
+for our application stack, and second,
+we enabled the cluster to interact with DynamoDB tables
+by attaching the DynamoDB full access iron policy
+to the iron role of the worker nodes.
+That's all for this lesson.
+If you have any questions, please let me know.
+Otherwise, feel free to move to the next one.
+Thank you.

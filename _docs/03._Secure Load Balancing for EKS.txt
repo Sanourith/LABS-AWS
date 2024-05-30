@@ -1,0 +1,225 @@
+Hello, cloud gurus, welcome back.
+In this lesson, we'll talk
+about secure load balancing for EKS.
+Let's break down this lesson.
+First, we'll understand the end user problem
+in terms of how to make easier for him or she
+to remember how to access our application
+in a secure manner.
+Then in a high level, we'll talk about
+how the encryption of the connection
+can help us securing the workload.
+We'll get this to the practice with a demo
+to cover some DNS and TLS topics.
+And finally, we'll summarize this lesson.
+Okay, so first, we have, once again,
+our Kubernetes Worker nodes.
+This time, we have the load balancer
+we talked about last lesson
+and we have our end user in the right side.
+The problem is that the host name
+or entry of the load balancer is something very complex
+that a user will unlikely recall.
+Let's try to remove this problem from the end user.
+So what we do is to set up a custom host name
+using DNS to that load balancer.
+We could use Route 53, the DNS service for AWS
+to set something like bookstore.acloudguru.com,
+for example, something like that.
+And the end user will really love.
+Now, the communication is likely
+to go through raw HTTP,
+which definitely it's not secure
+because that communication by default is not encrypted.
+How do we remove this concern?
+There is another service in AWS
+called AWS Certificate Manager that will help us
+maintaining SSL and TLS certificates very easily
+and that will enable a secure communication
+using HTTPS that encrypts the traffic,
+making it secure to navigate from the internet.
+Okay, so let's demonstrate all of these.
+First, we'll create the TLS certificate.
+Then we'll deploy the sample application with SSL
+and this is just for testing the integration with ACM.
+Then we'll create the DNS record
+in Route 53 pointing to the load balancer.
+And finally, we'll connect through it
+to the load balancer.
+Okay, so here we are in the AWS Management Console
+and let's go to Route 53.
+If you are using in ACloudGuru Playground of AWS,
+you should have at least one hosted zone
+and here it is.
+This is, in our case, our example.
+Now, you don't really need a hosted zone
+in AWS for doing this example.
+You can have an external DNS service,
+but keep in mind that some of the automation
+in further lessons are going
+to be only aligned with Route 53.
+So the SSL certificate we're gonna be creating
+will be under this domain.
+So let's go to our code
+and let's see a CloudFormation
+that will help us creating that.
+Here we are in the code and let's navigate
+to Infrastructure, cloudformation, ssl-certificate.
+to Infrastructure, cloudformation, ssl-certificate.
+In here, we have an acm.yaml file
+which is the CloudFormation template we want to execute.
+And what we have in here is a set of parameters.
+The first one is the DomainName,
+the one we just saw,
+and the hosted zone ID, also got from AWS.
+And in resources, we are creating a certificate.
+Again, we are deploying it in this way
+because CloudFormation will also take advantage
+of the Route 53 integration to validate
+that we own the hosted zone.
+If not, feel free to manually create
+the certificate on ACM and validate it
+in your own DNS service.
+Okay, let's go to the create.sh file.
+And what we have in here is a little bit
+of bash code with AWS CLI to get the domain name
+and the hosted zone ID of the domain
+I just showed you in Route 53.
+And then we deploy the CloudFormation template
+with these parameters.
+Let's go to AWS once again
+and deploy these in CloudShell.
+Okay, so here we are.
+Let's open CloudShell
+and make sure you are in the root of the repository.
+Let's go to infrastructure,
+then let's go to CloudFormation,
+and then let's go to ssl-certificate.
+In here, we're gonna run the create.sh file.
+It will take around five to 10 minutes.
+It sometimes takes more.
+It will try to validate the DNS
+and sometimes it can be slow.
+So just take a short pause
+and I'll resume the video after this is done.
+Okay, we're back, and as you can see,
+our stack is already deployed.
+So let's close CloudShell and let's go to ACM
+to see our certificate, Certificate Manager.
+Let's go to List certificates.
+And as you can see, we have our certificate
+already created, Amazon Issued,
+and the status is Issued without any problems.
+This is great.
+Now, let's go back to our code once again.
+Okay, so here we are under the Infrastructure folder.
+Let's go to Kubernetes-tooling
+and let's open load-balancer-controller once again.
+If we open the test folder, we're gonna find
+another bash file called run-with-ssl.
+And the difference in here is that
+we are setting the base domain as a value
+on the helm chart of the nginx
+in order to change the configuration
+of the Ingress and support SSL.
+Let's take a look at that very quickly as well.
+So let's go to templates.
+And if we open the Ingress app,
+we have an IF statement in here.
+And in the previous lesson,
+we deployed that without SSL enabled.
+Since now it is going to be enabled,
+it's going to fall under this section in here
+which opens the Port 443
+and will make the Port 80 redirect
+to the Port 443 as well,
+so that we enforce HTTP.
+Down here, we also have another section
+that will be added and we'll be basically saying
+that sample-app. the Value.baseDomain
+which be the only host name
+listening to our application.
+It means that if we set something else,
+it won't redirect the traffic to our nginx-service
+and that's a security feature.
+Okay, that's great.
+So what we have to do now is go to CloudShell
+and execute the run-with-ssl command.
+Okay, we are here in AWS once again.
+Let's go to CloudShell.
+Let's clear all of this and let's make sure
+we are in the root of our repository.
+There you go.
+So let's clear this again and let's go
+to Infrastructure/kubernetes-tooling/load-balancer/test.
+to Infrastructure/kubernetes-tooling/load-balancer/test.
+Here we are and let's do the run-with-ssl.sh.
+Okay, it was already added.
+So now, let's see the changes
+that our load balancer should have gotten.
+Let's close CloudShell and let's go to EC2.
+Let's go to our Load balancer.
+Let's open it up.
+And down here, we're gonna have two listeners,
+one for the Port HTTP, which as you can see
+will redirect to the HTTPS,
+and the one for HTTPS.
+It has two rules, so let's take a look at that.
+Okay, so the rules are basically,
+if the path is everything and the Host Header
+is sample-app. and our DNS,
+it will forward the traffic to our nginx service.
+If it doesn't match,
+it will simply redirect to a 404 page.
+Now, what we'll have to do
+is to grab this part sample-app,
+copy it, and let's go to Route 53.
+Let's go to Hosted zone.
+Open it up.
+And in here, we're gonna create a record.
+The record in here
+will be sample-app and the rest.
+The type, it's fine with an A,
+but we're gonna the Alias button.
+From here, we're gonna route the traffic
+to an Application Load Balancer
+of the region we currently are,
+which is us-east-1.
+And in here, we're gonna choose the load balancer.
+In this case, it's the only one we have.
+And now Create records.
+There you go, let's expand this a little bit.
+And as we can see here is our application host name.
+Let's copy it up and let's wait a little bit
+until it actually propagates.
+I'm gonna pause the video here,
+wait one minute, and then come back.
+Okay, so here we are in my new tab.
+And as you can see up here,
+our host name is sample-app.
+and the rest of the host name.
+But there is something important here
+is that it is SSL terminated.
+So let's show the certificate.
+And as you can see, it is Amazon Root CA 1 provided,
+which means that it's taking the certificate
+we just created for it.
+Awesome, isn't it?
+Okay, very exciting demo from my point of view.
+Did you enjoyed it?
+Let's quickly summarize this lesson.
+We learned how to secure load balancing in EKS
+by encrypting the communication
+between the end user and the load balancer.
+We created a DNS record
+for the load balancer in Route 53.
+We also created a TLS certificate in ACM
+with the help of CloudFormation.
+Again, applying as much automation as we can.
+And finally, we could see how the load balancer
+was assigned to the certificate
+to encrypt the connection.
+That's all for this lesson.
+If you have any questions, please let me know.
+Otherwise, feel free to move to the next one.
+Thank you.

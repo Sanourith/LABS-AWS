@@ -1,0 +1,194 @@
+Hello Cloud gurus.
+In this lesson, we'll discuss the best practices
+for load balancing
+or applications pretty easily from Kubernetes.
+Let's break down what we'll cover in this lesson.
+First, we'll briefly discuss why load balancing is important
+in a Kubernetes environment.
+Then we'll talk about one of the load balancer types
+on AWS called the application load balancer.
+Then we'll explain what the AWS load balancer controller is
+and what it has to offer to us.
+We will install the controller in our cluster
+and do a quick demo of how to use it.
+And finally we'll summarize the lesson.
+So why is load balancing important?
+Let's try to understand it in a practical manner.
+We have the worker nodes of our cluster here.
+We have three of them
+and we can be running multiple containers on each of them.
+So we have more than three.
+In the other hand, we have our end user
+who is very confused right away
+about how to access our application.
+That's where we introduce the load balancer.
+This will be the entry door for our application.
+So we receive the requests and then sends it
+to one of our nodes and eventually to one of our containers.
+Based on multiple algorithms,
+it will decide which node to send the request to.
+This sounds good, right?
+But then how do we manage it?
+AWS supports multiple types of load balancers
+but we will pick the application load balancer
+because it is great for microservices
+due to its layer 7 capabilities
+to work with the HTTP requests.
+It supports different routes and paths
+like sending the traffic to one app
+or another depending on which host name it has, for example
+and provides a very smooth integration
+with TLS certificates.
+This is an open source solution developed by AWS
+that needs to be installed in the Kubernetes cluster
+and it will help us maintaining the load balancing.
+It helps provisioning, removing
+or changing load balancers automatically,
+eliminates having to manage
+application load balancers directly,
+which can be very complex
+and it provides a native integration
+with Kubernetes objects.
+Okay, let's get our hands dirty
+by installing the AWS load balancer controller
+in our EKS cluster.
+Then we'll have a quick demonstration of how it works.
+Okay, so here we are in our repository
+and let's go to infrastructure, kBs-tooling,
+load balancer controller
+and here we are gonna find three things -
+a folder called test, we're gonna look at it in a second;
+a create.sh file and an iam-policy.yaml.
+So let's open the create.sh.
+And basically what we are doing here is
+adding a repository for the helm,
+installing a helm chart of the AWS load balancer controller
+and deploying a cloud formation template
+which is the iam-policy.yaml file we have in here.
+If we take a look at this file,
+it's basically an iam-policy
+with all the required permissions
+for the AWS load balancer controller to work.
+So let's go to our cloud shell
+and let's execute the create.sh file.
+Okay, here we are in our AWS management console
+and let's open clouds shell.
+Okay, now we are in the root of the repository.
+Let's go again to infrastructure,
+Kubernetes tooling, load balancer
+and in here we have the three things
+we already talked about.
+So let's run the create one,
+create.sh.
+There you go.
+It is basically installing the controller
+and deploying the cloud formation template
+with the required iam permissions.
+Okay, there you go. It's already finished.
+Now if we do kubectl get pods
+in the namespace kube system, we're gonna see two new ones
+which are the AWS load balancer controller.
+Now, this didn't really connected the permissions
+of the iam policy we created through cloud formation
+with this controller.
+We're gonna deep way deeper on this topic
+on the next chapter.
+But for now, what we're going to do is
+attach the iam policy to the worker nodes, iam roll.
+So let's close cloud shell and let's go to cloud formation.
+There you go.
+Here is our iam policy stack and let's go to outputs.
+And here we're gonna see an iam roll.
+Let's grab the name only.
+Now let's go to the eksctl-eks-acg-nodegroup cloud formation
+and let's go to resources
+and let's look for node instance role.
+Let's open this one up.
+Any here we are gonna add a new permission
+attaching a policy.
+Here we paste the name of the policy
+we just copied from cloud formation
+and let's pick it up and add the permissions
+and that's all.
+It means that now our worker nodes have the iam permissions
+for making the AWS load balancer controller work properly.
+Okay, cool.
+So now let's shoot a test to see how it actually works.
+Let's go back to our code
+so I can explain you what the test is about.
+Here we are in our code again
+and let's open the test folder.
+Now, as you can see, it is also a helm chart
+that we are going to be using.
+Let's take a look at
+what we're going to be deploying very quick.
+It is abnormal deployment of an nginx website.
+Nothing really fancy.
+There is a service, of course,
+we are going to be exposing it with the type node port
+and we are gonna have in here the ingress.
+This is very important because this is where we are going
+to start working with the controller itself.
+As a matter of fact, the ingress is the main object
+the controller is looking for, so we need to configure it
+so that the controller does its job.
+We are gonna find some things like in the annotations,
+the ingress.class, the group name,
+the scheme, this is going to be an internet facing.
+We are gonna have, if SSL is enabled,
+we are gonna be listening to the port 80 and 443
+and we're gonna be doing a redirect
+but if it is not enabled
+we're going to be just listening through port 80.
+And that's what we are gonna be doing right now
+just for testing.
+The AWS team did a great job explaining
+every single annotation that you can specify here
+with the options, syntax and so on.
+So please make sure you also review that documentation
+which is in the resources section of this lesson.
+Now, if we go down a little bit, we're gonna find
+in this spec, we have a rule of type HTTP.
+And what we are basically saying in here is that
+everything that comes to the root path and asterisk
+which means everything after the root,
+it's going to be redacted to the nginx-service.
+And if we have the SSL enabled,
+we're gonna be forcing it
+to be coming only from the host name we put in here.
+But again, a little bit more about this in the next lesson.
+So let's deploy these helm chart.
+Let's go back to our cloud shell.
+Okay, here we are again.
+Let's open the cloud shell icon.
+Let's clear this, and let's go to the test folder.
+In here, we are gonna be executing the run.sh file.
+And there you go, it deployed.
+Now what we should see is a load balancer being created
+so let's close the cloud shell and let's go to EC2.
+Now let's go to load balancers.
+And as you can see, there is a load balancer in here
+which is in provisioning a state.
+Let's wait around three to five minutes until this finishes
+so we can see it working.
+Okay, there you go. Now it is active.
+Let's grab the DNS copying it from this icon here.
+Let's open a new tab and let's paste it there.
+There you go.
+As you can see,
+it is a very simple welcome to nginx application.
+We are not doing anything else than this.
+We are just making sure
+that the controller is working properly.
+And that was all for this demo.
+Okay, that was fun.
+Let's summarize what we learned indeed.
+First, we discuss about why load balancing is important
+in a Kubernetes architecture.
+We learned about application load balancers
+and finally we learned about
+the AWS load balancer controller with a practical example.
+That's all for this lesson.
+If you have any questions, please let me know,
+otherwise, feel free to move to the next one.
+Thank you.
